@@ -1,15 +1,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/yurifilgueira/screenshot_organizer/agents"
 )
 
 func main() {
+
+	ctx := context.Background()
+	screenshotAgent, err := agents.NewScreenshotAgent(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -34,18 +43,21 @@ func main() {
 	defer watcher.Close()
 
 	watcher.Add(screnshotDir)
-	go watchLoop(watcher)
+	go watchLoop(ctx, watcher, screenshotAgent)
 
 	<-make(chan bool)
 
 }
 
-func watchLoop(watcher *fsnotify.Watcher) {
+func watchLoop(ctx context.Context, watcher *fsnotify.Watcher, screenshotAgent *agents.ScreenshotAgent) {
 	for {
 		select {
 		case event := <-watcher.Events:
 			if event.Op == fsnotify.Write {
 				log.Printf("Modified file: %s\n", event.Name)
+				response, _ := screenshotAgent.Organize(ctx, event.Name)
+
+				fmt.Printf("Response: %s\n", response)
 			}
 		case err := <-watcher.Errors:
 			log.Printf("Error: %v\n", err)
