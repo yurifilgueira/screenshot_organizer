@@ -41,3 +41,43 @@ func readDirectoriesNameTool(ctx tool.Context, args ReadDirectoriesNameArgs) (Re
 	return ReadDirectoriesNameResult{foldersNames}, nil
 
 }
+
+type MoveScreenshotToDirectoryArgs struct {
+	FolderName string `json:"folderName" jsonschema:"The name of the folder to move the screenshot to."`
+	FilePath   string `json:"filePath" jsonschema:"The path of the screenshot to move."`
+}
+
+type MoveScreenshotToDirectoryResult struct {
+	FileMoved bool `json:"fileMoved"`
+}
+
+func moveScreenshotToDirectoryTool(ctx tool.Context, args MoveScreenshotToDirectoryArgs) (MoveScreenshotToDirectoryResult, error) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	baseDir := filepath.Join(userHomeDir, "OneDrive", "Imagens", "Screenshots")
+
+	newDir := filepath.Join(baseDir, args.FolderName)
+
+	info, err := os.Stat(newDir)
+
+	if os.IsNotExist(err) {
+		err = os.Mkdir(newDir, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if info != nil && !info.IsDir() {
+		log.Fatal(err)
+	}
+
+	fmt.Println(newDir)
+
+	os.Rename(args.FilePath, filepath.Join(newDir, filepath.Base(args.FilePath)))
+
+	return MoveScreenshotToDirectoryResult{true}, nil
+
+}

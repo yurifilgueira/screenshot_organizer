@@ -43,14 +43,14 @@ func NewScreenshotAgent(ctx context.Context) (*ScreenshotAgent, error) {
 
 	instruction := `You are a screenshot organizer. 
 	Analyze the image path or description and return ONLY a single word representing the category folder where it should be placed (e.g., "Code", "Finance", "Gaming", "Social", "Work").
-	Do not provide explanations, just the category name. You MUST use the tool to see the folder names that already exist and see the current scenario.`
+	Do not provide explanations, just the category name. You MUST use the tool to see the folder names that already exist and see the current scenario. You MUST use the other tool to move the screenshot to the folder correspondent to the categorization that you made. FEEL FREE TO CREATE NEW CATEGORIES.`
 
 	a, err := llmagent.New(llmagent.Config{
 		Name:        "Screenshot Organizer",
 		Description: "Organizes screenshots into folders based on their content.",
 		Model:       model,
 		Instruction: instruction,
-		Tools:       []tool.Tool{getReadDirectoriesNameTool()},
+		Tools:       []tool.Tool{getReadDirectoriesNameTool(), getMoveScreenshotToDirectoryTool()},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create agent: %w", err)
@@ -133,6 +133,22 @@ func getReadDirectoriesNameTool() tool.Tool {
 			Description: "Lists the names of existing folders in the screenshot directory to provide context for categorization.",
 		},
 		readDirectoriesNameTool,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return tool
+}
+
+func getMoveScreenshotToDirectoryTool() tool.Tool {
+	tool, err := functiontool.New(
+		functiontool.Config{
+			Name:        "move_screenshot_to_directory_tool",
+			Description: "Move the screenshot to the specified folder.",
+		},
+		moveScreenshotToDirectoryTool,
 	)
 
 	if err != nil {
