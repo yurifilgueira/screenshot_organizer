@@ -1,7 +1,6 @@
 package agents
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -33,7 +32,6 @@ func readDirectoriesNameTool(ctx tool.Context, args ReadDirectoriesNameArgs) (Re
 	foldersNames := []string{}
 	for _, folder := range folders {
 		if folder.IsDir() {
-			fmt.Println(folder.Name())
 			foldersNames = append(foldersNames, folder.Name())
 		}
 	}
@@ -73,8 +71,6 @@ func moveScreenshotToDirectoryTool(ctx tool.Context, args MoveScreenshotToDirect
 	if info != nil && !info.IsDir() {
 		log.Fatal(err)
 	}
-
-	fmt.Println(newDir)
 
 	os.Rename(args.FilePath, filepath.Join(newDir, filepath.Base(args.FilePath)))
 

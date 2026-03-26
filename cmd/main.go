@@ -65,7 +65,11 @@ func watchLoop(ctx context.Context, watcher *fsnotify.Watcher, screenshotAgent *
 				}
 
 				log.Printf("Modified file: %s\n", event.Name)
-				response, _ := screenshotAgent.Organize(ctx, event.Name)
+				response, err := screenshotAgent.Organize(ctx, event.Name)
+
+				if err != nil {
+					log.Fatal(err)
+				}
 
 				fmt.Printf("Response: %s\n", response)
 			}
