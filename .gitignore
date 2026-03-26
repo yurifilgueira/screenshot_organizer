@@ -1,2 +1,17 @@
 ### .env ###
 .env
+
+# Go
+bin/
+
+# Wails
+build/bin/
+frontend/dist/
+
+# IDEs
+.idea/
+.vscode/
+
+# Node
+node_modules/
+frontend/node_modules/

@@ -1,0 +1,93 @@
+
+:root {
+    --bg-color: #1b2636;
+    --card-bg: #2a3a50;
+    --text-color: #ffffff;
+    --accent-color: #00d2ff;
+    --secondary-text: #a0aec0;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+{
+    display: flex
+;
+    flex-direction: column
+;
+    height: 100vh
+;
+    padding: 2rem
+;
+    box-sizing: border-box
+;
+}
+
+header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    background: linear-gradient(90deg, #fff, var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.status-badge {
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+.card {
+    background-color: var(--card-bg);
+    padding: 1.2rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    border-left: 5px solid var(--accent-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateX(8px);
+    background-color: #31445e;
+}
+
+.filename {
+    font-weight: 500;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.category-tag {
+    background: rgba(0, 210, 255, 0.15);
+    color: var(--accent-color);
+    padding: 6px 16px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 1px solid var(--accent-color);
+}
