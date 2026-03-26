@@ -1,5 +1,7 @@
 import {useEffect, useState} from "react";
 
+import './App.css';
+
 import * as runtime from "../wailsjs/runtime/runtime";
 
 interface Screenshot {

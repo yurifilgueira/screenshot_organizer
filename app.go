@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -82,8 +81,6 @@ func (a *App) startWatching() {
 					runtime.EventsEmit(a.ctx, "processing-error", err.Error())
 					continue
 				}
-
-				fmt.Println("Response: ", response)
 
 				runtime.EventsEmit(a.ctx, "new-result", map[string]string{
 					"filename": filepath.Base(event.Name),
