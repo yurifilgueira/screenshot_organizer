@@ -40,7 +40,7 @@ function App() {
                 <div className={'history-list'}>
                     {history.map((item, index) => (
                         <div key={index} className={'card'}>
-                            <span className={'fileName'}>{item.filename}</span>
+                            <span className={'filename'}>{item.filename}</span>
                             <span className={'category-tag'}>{item.category}</span>
                         </div>
                     ))}

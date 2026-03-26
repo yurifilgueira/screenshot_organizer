@@ -1,4 +1,3 @@
-
 :root {
     --bg-color: #1b2636;
     --card-bg: #2a3a50;
@@ -14,7 +13,7 @@ body {
     color: var(--text-color);
 }
 
-#App {
+.App {
     display: flex;
     flex-direction: column;
     height: 100vh;
