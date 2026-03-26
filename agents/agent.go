@@ -12,6 +12,8 @@ import (
 	"google.golang.org/adk/model/gemini"
 	"google.golang.org/adk/runner"
 	"google.golang.org/adk/session"
+	"google.golang.org/adk/tool"
+	"google.golang.org/adk/tool/functiontool"
 	"google.golang.org/genai"
 )
 
@@ -40,14 +42,15 @@ func NewScreenshotAgent(ctx context.Context) (*ScreenshotAgent, error) {
 	}
 
 	instruction := `You are a screenshot organizer. 
-Analyze the image path or description and return ONLY a single word representing the category folder where it should be placed (e.g., "Code", "Finance", "Gaming", "Social", "Work").
-Do not provide explanations, just the category name.`
+	Analyze the image path or description and return ONLY a single word representing the category folder where it should be placed (e.g., "Code", "Finance", "Gaming", "Social", "Work").
+	Do not provide explanations, just the category name. You MUST use the tool to see the folder names that already exist and see the current scenario.`
 
 	a, err := llmagent.New(llmagent.Config{
 		Name:        "Screenshot Organizer",
 		Description: "Organizes screenshots into folders based on their content.",
 		Model:       model,
 		Instruction: instruction,
+		Tools:       []tool.Tool{getReadDirectoriesNameTool()},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create agent: %w", err)
@@ -96,13 +99,11 @@ func (s *ScreenshotAgent) Organize(ctx context.Context, filePath string) (string
 		log.Fatal(err)
 	}
 
-	fmt.Print(imgBytes)
-
 	mimetype := "image/png"
 	userMessage := &genai.Content{
 		Role: genai.RoleUser,
 		Parts: []*genai.Part{
-			genai.NewPartFromText("Analyze this screenshot and categorize it."),
+			genai.NewPartFromText("Analyze this screenshot, present in " + filePath + " and categorize it."),
 			genai.NewPartFromBytes(imgBytes, mimetype),
 		},
 	}
@@ -123,4 +124,20 @@ func (s *ScreenshotAgent) Organize(ctx context.Context, filePath string) (string
 	}
 
 	return llmResponse, nil
+}
+
+func getReadDirectoriesNameTool() tool.Tool {
+	tool, err := functiontool.New(
+		functiontool.Config{
+			Name:        "read_directories_name_tool",
+			Description: "Lists the names of existing folders in the screenshot directory to provide context for categorization.",
+		},
+		readDirectoriesNameTool,
+	)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return tool
 }
