@@ -31,15 +31,35 @@ An intelligent AI-powered screenshot organizer. This project monitors your scree
     GOOGLE_API_KEY=your_key_here
     ```
 
-3.  **Install dependencies:**
+3.  **Install Go dependencies:**
     ```bash
     go mod tidy
     ```
 
-4.  **Run the project:**
+## Running the Application
+
+### Development Mode
+
+**Prerequisites:**
+- [Go](https://go.dev/doc/install) installed (1.18+)
+- [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+- Node.js and npm (for the frontend)
+
+**Steps:**
+
+1. **Install Wails globally (if not already done):**
     ```bash
-    go run cmd/main.go
+    go install github.com/wailsapp/wails/v2/cmd/wails@latest
     ```
+
+2. **Run the application in development mode:**
+    ```bash
+    wails dev
+    ```
+    This will start both the backend (Go) and frontend (Vue) in development mode with hot reload.
+
+3. **Access the application:**
+    The desktop application window will open automatically.
 
 ## How It Works?
 
