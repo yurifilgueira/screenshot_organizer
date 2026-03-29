@@ -85,11 +85,39 @@ main {
     border-radius: 8px;
     outline: none;
     transition: all 0.2s;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .form-group input:focus {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2);
+}
+
+.input-with-button {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.browse-button {
+    background-color: var(--card-bg);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 0 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.browse-button:hover {
+    background-color: var(--accent-color);
+    color: #111;
+}
+
+input::-ms-reveal {
+    filter: invert(100%);
 }
 
 .save-button {

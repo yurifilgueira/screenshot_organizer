@@ -14,10 +14,13 @@ import (
 type App struct {
 	ctx             context.Context
 	screenshotAgent *agents.ScreenshotAgent
+	isWatching      bool
+	dirPath         string
+	watcher         *fsnotify.Watcher
 }
 
 func NewApp() *App {
-	return &App{}
+	return &App{isWatching: false}
 }
 
 func (a *App) startup(ctx context.Context) {
@@ -25,36 +28,18 @@ func (a *App) startup(ctx context.Context) {
 
 	agent, err := agents.NewScreenshotAgent(ctx)
 	if err != nil {
-		log.Printf("Erro ao iniciar agente: %v", err)
+		log.Printf("Error: %v", err)
 		return
 	}
 	a.screenshotAgent = agent
-
-	go a.startWatching()
 }
 
 func (a *App) startWatching() {
-	userHomeDir, _ := os.UserHomeDir()
 
-	possibleDirs := []string{
-		filepath.Join(userHomeDir, "OneDrive", "Imagens", "Screenshots"),
-		filepath.Join(userHomeDir, "OneDrive", "Pictures", "Screenshots"),
-		filepath.Join(userHomeDir, "Pictures", "Screenshots"),
-		filepath.Join(userHomeDir, "Imagens", "Screenshots"),
-		"screenshots",
-	}
+	screenshotDir := a.dirPath
 
-	var screenshotDir string
-	for _, dir := range possibleDirs {
-		if _, err := os.Stat(dir); err == nil {
-			screenshotDir = dir
-			break
-		}
-	}
-
-	if screenshotDir == "" {
-		screenshotDir = "screenshots"
-		os.MkdirAll(screenshotDir, 0755)
+	if screenshotDir == "" || !filepath.IsAbs(screenshotDir) {
+		log.Fatal("Screenshot directory path is not set or not absolute.")
 	}
 
 	watcher, err := fsnotify.NewWatcher()
@@ -64,6 +49,9 @@ func (a *App) startWatching() {
 	defer watcher.Close()
 
 	watcher.Add(screenshotDir)
+
+	a.isWatching = true
+	a.watcher = watcher
 
 	for {
 		select {
@@ -91,4 +79,29 @@ func (a *App) startWatching() {
 			log.Printf("Error: %v", err)
 		}
 	}
+}
+
+func (a *App) SaveConfig(path string, _key string) {
+
+	oldPath := a.dirPath
+	a.dirPath = path
+
+	if !a.isWatching {
+		go a.startWatching()
+		return
+	}
+
+	a.watcher.Add(a.dirPath)
+	a.watcher.Remove(oldPath)
+}
+
+func (a *App) SelectDirectory() string {
+	selection, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select the Screenshot Directory",
+	})
+	if err != nil {
+		log.Printf("Error opening directory: %v", err)
+		return ""
+	}
+	return selection
 }
