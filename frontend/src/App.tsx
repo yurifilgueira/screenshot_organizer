@@ -10,7 +10,7 @@ interface Screenshot {
 }
 
 function App() {
-    const [history, setHistory] = useState<Screenshot[]>([]);
+    const [_history, setHistory] = useState<Screenshot[]>([]);
     const [status, setStatus] = useState<string>("Monitoring folder...");
 
     useEffect(() => {
@@ -37,11 +37,33 @@ function App() {
             </header>
 
             <main>
-                <div className={'history-list'}>
-                    {history.map((item, index) => (
-                        <div key={index} className={'card'}>
-                            <span className={'filename'}>{item.filename}</span>
-                            <span className={'category-tag'}>{item.category}</span>
+                <section className="config-section">
+                    <form className="config-form" onSubmit={(e) => e.preventDefault()}>
+                        <div className="form-group">
+                            <label htmlFor="dir-path">Screenshot Directory Path</label>
+                            <input 
+                                id="dir-path"
+                                type="text" 
+                                placeholder="C:\Users\Name\Pictures\Screenshots"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="api-key">Gemini API Key</label>
+                            <input 
+                                id="api-key"
+                                type="password" 
+                                placeholder="Enter your Gemini API Key"
+                            />
+                        </div>
+                        <button type="submit" className="save-button">Save Configuration</button>
+                    </form>
+                </section>
+
+                <div className="history-list">
+                    {_history.map((item, index) => (
+                        <div key={index} className="card">
+                            <span className="filename">{item.filename}</span>
+                            <span className="category-tag">{item.category}</span>
                         </div>
                     ))}
                 </div>
