@@ -67,6 +67,7 @@ An intelligent AI-powered screenshot organizer. This project monitors your scree
 2.  Whenever a new screenshot is detected, the `ScreenshotAgent` reads the image bytes.
 3.  The image is sent to Gemini with a system instruction for visual analysis.
 4.  The agent returns the ideal category based on what it "saw" in the image.
+5.  **Organization**: The agent moves the screenshot to its category folder. If the folder doesn't exist, it's created automatically.
 
 ---
 Developed by Yuri Filgueira.
