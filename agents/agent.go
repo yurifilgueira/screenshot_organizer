@@ -23,19 +23,18 @@ type ScreenshotAgent struct {
 	sessionService session.Service
 }
 
-func NewScreenshotAgent(ctx context.Context) (*ScreenshotAgent, error) {
+func NewScreenshotAgent(ctx context.Context, key string) (*ScreenshotAgent, error) {
 	err := godotenv.Load()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load .env file: %w", err)
 	}
 
-	apiKey := os.Getenv("GOOGLE_API_KEY")
-	if apiKey == "" {
-		return nil, fmt.Errorf("GOOGLE_API_KEY not set")
+	if key == "" {
+		return nil, fmt.Errorf("Api Key not set")
 	}
 
 	model, err := gemini.NewModel(ctx, "gemini-2.5-flash", &genai.ClientConfig{
-		APIKey: apiKey,
+		APIKey: key,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Gemini model: %w", err)
