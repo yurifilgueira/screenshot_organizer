@@ -1,4 +1,4 @@
-# Screenshot Organizer Agent (Work in Progress)
+# Screenshot Organizer (Work in Progress)
 
 An intelligent AI-powered screenshot organizer. This project monitors your screenshot folder in real-time and uses the multimodal power of **Gemini** to analyze the visual content of each image and categorize it automatically.
 
