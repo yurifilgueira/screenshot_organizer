@@ -38,11 +38,9 @@ func (a *App) startup(ctx context.Context) {
 
 	screenshotsDirectory, apikey := loadConfigs()
 
-	if screenshotsDirectory != "" {
+	if screenshotsDirectory != "" && apikey != "" {
 		a.dirPath = screenshotsDirectory
-	}
 
-	if apikey != "" {
 		newAgent, err := agents.NewScreenshotAgent(a.ctx, apikey)
 		if err != nil {
 			log.Fatal(err)
@@ -54,36 +52,65 @@ func (a *App) startup(ctx context.Context) {
 
 }
 
-func loadConfigs() (screenshotsDirectory string, apikey string) {
+func loadConfigs() (string, string) {
+
+	screenshotsDirectory, err := loadScreenshotDirPathConfig()
+	if err != nil {
+		fmt.Println(err)
+		return "", ""
+	}
+
+	apikey, err := loadApikeyConfig()
+
+	if err != nil {
+		fmt.Println(err)
+		return "", ""
+	}
+
+	return screenshotsDirectory, apikey
+}
+
+func loadApikeyConfig() (string, error) {
+	username, err := user.Current()
+
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	apikey, err := keyring.Get(SERVICE_NAME, username.Username)
+
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+
+	return apikey, nil
+}
+
+func loadScreenshotDirPathConfig() (screenShotDirectory string, err error) {
 	userConfigDir, err := os.UserConfigDir()
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	configPath := filepath.Join(userConfigDir, BASE_CONFIG_FOLDER_NAME, CONFIG_FOLDER_NAME, CONFIG_FILE_NAME)
 
 	data, err := os.ReadFile(configPath)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	result := map[string]string{}
-	json.Unmarshal(data, &result)
-
-	username, err := user.Current()
-
+	err = json.Unmarshal(data, &result)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	apikey, err = keyring.Get(SERVICE_NAME, username.Username)
+	screenShotDirectory = result[CONFIG_DIRECTORY_FIELD]
 
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return result[CONFIG_DIRECTORY_FIELD], apikey
+	return screenShotDirectory, nil
 }
 
 func (a *App) startWatching() {
