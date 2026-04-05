@@ -97,6 +97,7 @@ main {
 .input-with-button {
     display: flex;
     gap: 0.5rem;
+    position: relative;
 }
 
 .browse-button {
@@ -116,8 +117,20 @@ main {
     color: #111;
 }
 
-input::-ms-reveal {
-    filter: invert(100%);
+.toggle-password-button {
+    background: transparent;
+    color: var(--secondary-text);
+    border: none;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.toggle-password-button:hover {
+    color: var(--accent-color);
 }
 
 .save-button {

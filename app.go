@@ -33,6 +33,19 @@ func NewApp() *App {
 	return &App{isWatching: false}
 }
 
+type AppConfig struct {
+	ScreenshotsDirPath string `json:"screenshotsDirPath"`
+	ApiKey             string `json:"apiKey"`
+}
+
+func (a *App) GetConfig() *AppConfig {
+	screenshotsDirectory, apikey := loadConfigs()
+	return &AppConfig{
+		ScreenshotsDirPath: screenshotsDirectory,
+		ApiKey:             apikey,
+	}
+}
+
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
