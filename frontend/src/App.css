@@ -49,7 +49,7 @@ main {
     overflow-y: hidden;
 }
 
-.config-section {
+.section {
     background-color: var(--card-bg);
     padding: 1.5rem;
     border-radius: 12px;
@@ -192,4 +192,50 @@ main {
     text-transform: uppercase;
     letter-spacing: 1px;
     border: 1px solid var(--accent-color);
+}
+
+/*
+Toggle Switch
+*/
+.toggle {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.toggle input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #333;
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #FFF;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #00d2ff;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
 }

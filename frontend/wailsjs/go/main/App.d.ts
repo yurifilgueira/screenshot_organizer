@@ -7,3 +7,5 @@ export function GetConfig():Promise<main.AppConfig>;
 export function SaveConfig(arg1:string,arg2:string):Promise<void>;
 
 export function SelectDirectory():Promise<string>;
+
+export function SetHideOnClose(arg1:boolean):Promise<void>;

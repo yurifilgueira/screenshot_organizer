@@ -13,3 +13,7 @@ export function SaveConfig(arg1, arg2) {
 export function SelectDirectory() {
   return window['go']['main']['App']['SelectDirectory']();
 }
+
+export function SetHideOnClose(arg1) {
+  return window['go']['main']['App']['SetHideOnClose'](arg1);
+}

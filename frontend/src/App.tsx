@@ -4,7 +4,7 @@ import './App.css';
 
 import * as runtime from "../wailsjs/runtime/runtime";
 import {LogError, LogInfo} from "../wailsjs/runtime";
-import {GetConfig, SaveConfig, SelectDirectory} from "../wailsjs/go/main/App";
+import {GetConfig, SaveConfig, SelectDirectory, SetHideOnClose} from "../wailsjs/go/main/App";
 
 interface Screenshot {
     filename: string;
@@ -31,6 +31,7 @@ function App() {
     const [dirPath, setDirPath] = useState<string>("");
     const [apiKey, setApiKey] = useState<string>("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [hideOnClose, setHideOnClose] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchConfig = async () => {
@@ -81,6 +82,15 @@ function App() {
         }
     };
 
+    const handleToggle = (e: { target: any; }) => {
+        const target = e.target;
+        setHideOnClose(target.checked);
+
+        SetHideOnClose(target.checked);
+
+        LogInfo(`Setting hideOnClose to ${target.checked}`);
+    }
+
     return (
         <div className="App">
             <header>
@@ -89,7 +99,7 @@ function App() {
             </header>
 
             <main>
-                <section className="config-section">
+                <section className="section">
                     <form className="config-form" onSubmit={handleSubmit}>
                         <div className="form-group">
                             <label htmlFor="dir-path">Screenshot Directory Path</label>
@@ -134,15 +144,15 @@ function App() {
                         <button type="submit" className="save-button">Save Configuration</button>
                     </form>
                 </section>
-
-                <div className="history-list">
-                    {_history.map((item, index) => (
-                        <div key={index} className="card">
-                            <span className="filename">{item.filename}</span>
-                            <span className="category-tag">{item.category}</span>
-                        </div>
-                    ))}
-                </div>
+                <section className="section">
+                    <div className="form-group">
+                        <label>Minimize on Close Window</label>
+                        <label className="toggle">
+                            <input type="checkbox" id="btnToggle" name="btnToggle" checked={hideOnClose} onChange={handleToggle}/>
+                            <span className="slider"></span>
+                        </label>
+                    </div>
+                </section>
             </main>
         </div>
     )

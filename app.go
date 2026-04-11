@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"sync"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -27,34 +28,68 @@ type App struct {
 	isWatching      bool
 	dirPath         string
 	watcher         *fsnotify.Watcher
+	hideOnClose     bool
+	appConfig       AppConfig
 }
 
 func NewApp() *App {
-	return &App{isWatching: false}
+	return &App{isWatching: false, hideOnClose: false}
 }
 
 type AppConfig struct {
 	ScreenshotsDirPath string `json:"screenshotsDirPath"`
 	ApiKey             string `json:"apiKey"`
+	HideOnClose        bool   `json:"hideOnClose"`
+}
+
+type ConfigManager struct {
+	Data       AppConfig
+	mutex      sync.Mutex
+	configPath string
+}
+
+func NewConfigManager() *ConfigManager {
+
+	configPath := getConfigFilePath()
+	cm := &ConfigManager{
+		configPath: configPath,
+		mutex:      sync.Mutex{},
+	}
+
+	file, err := os.ReadFile(configPath)
+
+	if err == nil {
+		json.Unmarshal(file, &cm.Data)
+	} else {
+		cm.Data = AppConfig{HideOnClose: false}
+	}
+
+	return cm
 }
 
 func (a *App) GetConfig() *AppConfig {
-	screenshotsDirectory, apikey := loadConfigs()
-	return &AppConfig{
-		ScreenshotsDirPath: screenshotsDirectory,
-		ApiKey:             apikey,
+	err := a.loadConfigs()
+
+	if err != nil {
+		a.appConfig = AppConfig{HideOnClose: false}
 	}
+
+	return &a.appConfig
 }
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	screenshotsDirectory, apikey := loadConfigs()
+	err := a.loadConfigs()
 
-	if screenshotsDirectory != "" && apikey != "" {
-		a.dirPath = screenshotsDirectory
+	if err != nil {
+		a.appConfig = AppConfig{HideOnClose: false}
+	}
 
-		newAgent, err := agents.NewScreenshotAgent(a.ctx, apikey)
+	if a.appConfig.ScreenshotsDirPath != "" && a.appConfig.ApiKey != "" {
+		a.dirPath = a.appConfig.ScreenshotsDirPath
+
+		newAgent, err := agents.NewScreenshotAgent(a.ctx, a.appConfig.ApiKey)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,65 +100,56 @@ func (a *App) startup(ctx context.Context) {
 
 }
 
-func loadConfigs() (string, string) {
+func (a *App) loadConfigs() error {
 
-	screenshotsDirectory, err := loadScreenshotDirPathConfig()
+	err := loadScreenshotDirPathConfig(&a.appConfig)
 	if err != nil {
 		fmt.Println(err)
-		return "", ""
+		return err
 	}
 
-	apikey, err := loadApikeyConfig()
+	err = loadApikeyConfig(&a.appConfig)
 
 	if err != nil {
 		fmt.Println(err)
-		return "", ""
+		return err
 	}
 
-	return screenshotsDirectory, apikey
+	return nil
 }
 
-func loadApikeyConfig() (string, error) {
+func loadApikeyConfig(config *AppConfig) error {
 	username, err := user.Current()
 
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return err
 	}
 
-	apikey, err := keyring.Get(SERVICE_NAME, username.Username)
+	config.ApiKey, err = keyring.Get(SERVICE_NAME, username.Username)
 
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return err
 	}
 
-	return apikey, nil
+	return nil
 }
 
-func loadScreenshotDirPathConfig() (screenShotDirectory string, err error) {
-	userConfigDir, err := os.UserConfigDir()
-
-	if err != nil {
-		return "", err
-	}
-	configPath := filepath.Join(userConfigDir, BASE_CONFIG_FOLDER_NAME, CONFIG_FOLDER_NAME, CONFIG_FILE_NAME)
+func loadScreenshotDirPathConfig(config *AppConfig) error {
+	configPath := getConfigFilePath()
 
 	data, err := os.ReadFile(configPath)
-
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	result := map[string]string{}
-	err = json.Unmarshal(data, &result)
+	err = json.Unmarshal(data, &config)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	screenShotDirectory = result[CONFIG_DIRECTORY_FIELD]
-
-	return screenShotDirectory, nil
+	return nil
 }
 
 func (a *App) startWatching() {
@@ -183,7 +209,15 @@ func (a *App) SaveConfig(path string, key string) {
 	}
 	a.screenshotAgent = newAgent
 
-	persistScreenshotDirPathConfig(a)
+	configData, err := json.MarshalIndent(a.appConfig, "", "  ")
+
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	os.WriteFile(getConfigFilePath(), configData, 0644)
+
 	persistApiKeyConfig(key)
 
 	if !a.isWatching {
@@ -195,7 +229,7 @@ func (a *App) SaveConfig(path string, key string) {
 	a.watcher.Remove(oldPath)
 }
 
-func persistScreenshotDirPathConfig(a *App) {
+func getConfigFilePath() string {
 	configPath, err := os.UserConfigDir()
 
 	if err != nil {
@@ -217,9 +251,7 @@ func persistScreenshotDirPathConfig(a *App) {
 	}
 
 	configFilePath := filepath.Join(appFolder, CONFIG_FOLDER_NAME, CONFIG_FILE_NAME)
-	configData := map[string]string{CONFIG_DIRECTORY_FIELD: a.dirPath}
-	jsonData, _ := json.Marshal(configData)
-	os.WriteFile(configFilePath, jsonData, 0644)
+	return configFilePath
 }
 
 func persistApiKeyConfig(key string) {
@@ -246,4 +278,20 @@ func (a *App) SelectDirectory() string {
 		return ""
 	}
 	return selection
+}
+
+func (a *App) beforeClose(ctx context.Context) bool {
+
+	if a.hideOnClose {
+		runtime.WindowHide(ctx)
+		return true
+	}
+
+	return false
+}
+
+func (a *App) SetHideOnClose(hideOnClose bool) {
+	a.hideOnClose = hideOnClose
+
+	a.SaveConfig(a.dirPath, a.appConfig.ApiKey)
 }
