@@ -5,6 +5,7 @@ go 1.25.0
 require github.com/fsnotify/fsnotify v1.9.0
 
 require (
+	fyne.io/systray v1.12.0
 	github.com/joho/godotenv v1.5.1
 	github.com/wailsapp/wails/v2 v2.12.0
 	github.com/zalando/go-keyring v0.2.8

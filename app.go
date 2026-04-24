@@ -86,6 +86,8 @@ func (a *App) startup(ctx context.Context) {
 		a.appConfig = AppConfig{HideOnClose: false}
 	}
 
+	a.hideOnClose = a.appConfig.HideOnClose
+
 	if a.appConfig.ScreenshotsDirPath != "" && a.appConfig.ApiKey != "" {
 		a.dirPath = a.appConfig.ScreenshotsDirPath
 
@@ -211,6 +213,8 @@ func (a *App) SaveConfig(path string, key string) {
 
 	configData, err := json.MarshalIndent(a.appConfig, "", "  ")
 
+	fmt.Println(a.appConfig)
+
 	if err != nil {
 		log.Println(err)
 		return
@@ -291,6 +295,7 @@ func (a *App) beforeClose(ctx context.Context) bool {
 }
 
 func (a *App) SetHideOnClose(hideOnClose bool) {
+	a.appConfig.HideOnClose = hideOnClose
 	a.hideOnClose = hideOnClose
 
 	a.SaveConfig(a.dirPath, a.appConfig.ApiKey)

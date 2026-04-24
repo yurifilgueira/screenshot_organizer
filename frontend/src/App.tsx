@@ -39,6 +39,7 @@ function App() {
             if (config) {
                 setDirPath(config.screenshotsDirPath);
                 setApiKey(config.apiKey);
+                setHideOnClose(config.hideOnClose);
             }
         };
 
